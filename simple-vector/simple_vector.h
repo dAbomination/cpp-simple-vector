@@ -121,11 +121,17 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
+        // Проверяем что индекс не выходит за пределы вектора
+        assert(index < size_);
+
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
+        // Проверяем что индекс не выходит за пределы вектора
+        assert(index < size_);
+
         return items_[index];
     }
 
@@ -165,22 +171,19 @@ public:
                 SimpleVector<Type> new_vector(new_capacity);
                 std::generate(new_vector.begin(), new_vector.end(), []() { return Type(); });;
                 std::copy(std::make_move_iterator(begin()), std::make_move_iterator(end()), new_vector.begin());
-                items_.swap(new_vector.items_);
 
-                size_ = new_size;
+                items_.swap(new_vector.items_);                
                 capacity_ = new_capacity;
             }
             else {
                 // Новый размер больше старого, но меньше вместимости
                 // необходимо заполнить новые элементы значением по умолчанию для Type
-                size_t old_size = size_;
-                size_ = new_size;
+                size_t old_size = size_;                
                 std::generate((begin() + old_size), end(), []() { return Type(); });
             }
         }
-        else { // Новый размер меньше старого
-            size_ = new_size;
-        }        
+        // Если же нет, то просто меняем размер
+        size_ = new_size;        
     }    
 
     // Возвращает итератор на начало массива
@@ -192,7 +195,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     Iterator end() noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }
 
     // Возвращает константный итератор на начало массива
@@ -204,7 +207,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator end() const noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }
 
     // Возвращает константный итератор на начало массива
@@ -216,7 +219,7 @@ public:
     // Возвращает итератор на элемент, следующий за последним
     // Для пустого массива может быть равен (или не равен) nullptr
     ConstIterator cend() const noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }    
 
     // Оператор присваивания
@@ -282,8 +285,10 @@ public:
     // Возвращает итератор на вставленное значение
     // Если перед вставкой значения вектор был заполнен полностью,
     // вместимость вектора должна увеличиться вдвое, а для вектора вместимостью 0 стать равной 1
-    Iterator Insert(ConstIterator pos, const Type& value) {        
+    Iterator Insert(ConstIterator pos, const Type& value) {
         Iterator pos_to_insert = const_cast<Iterator>(pos);
+        // Проверяем что pos находится в интервале от begin() до end()
+        assert( (begin() <= pos_to_insert) && (pos_to_insert <= end()) );
 
         if (size_ < capacity_) {
             // Случай когда не надо изменять вместимость вектора
@@ -309,6 +314,8 @@ public:
 
     Iterator Insert(ConstIterator pos, Type&& value) {
         Iterator pos_to_insert = const_cast<Iterator>(pos);
+        // Проверяем что pos находится в интервале от begin() до end()
+        assert((begin() <= pos_to_insert) && (pos_to_insert <= end()));
 
         if (size_ < capacity_) {
             // Случай когда не надо изменять вместимость вектора
@@ -334,16 +341,19 @@ public:
 
     // "Удаляет" последний элемент вектора. Вектор не должен быть пустым
     void PopBack() noexcept {
+        assert(!IsEmpty());
         // Если вектор не пуст уменьшаем его размер на 1
-        if (!IsEmpty()) --size_;
+        --size_;        
     }
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {    
+        assert(!IsEmpty());
         Iterator pos_to_delete = const_cast<Iterator>(pos);
+        // Проверяем что pos находится в интервале от begin() до end()
+        assert((begin() <= pos_to_delete) && (pos_to_delete <= end()));
 
         std::copy(std::make_move_iterator(pos_to_delete + 1), std::make_move_iterator(end()), pos_to_delete);
-
         --size_;
         return pos_to_delete;
     }
