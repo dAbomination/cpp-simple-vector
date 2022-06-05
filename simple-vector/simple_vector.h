@@ -41,7 +41,6 @@ public:
         capacity_ = size;
 
         ArrayPtr<Type> temp_vector(capacity_);        
-        //std::fill(temp_vector.Get(), temp_vector.Get() + size_, Type());
         std::generate(temp_vector.Get(), temp_vector.Get() + size_, []() { return Type(); });
         items_.swap(temp_vector);
     }
@@ -281,6 +280,7 @@ public:
             swap(new_vector);
         }
     }
+	
     // ¬ставл€ет значение value в позицию pos.
     // ¬озвращает итератор на вставленное значение
     // ≈сли перед вставкой значени€ вектор был заполнен полностью,
@@ -389,7 +389,6 @@ void TestPrintSimpleVector(const SimpleVector<Type>& values) {
     std::cout << std::endl;
     std::cout << "Size: " << values.GetSize() << ". Capacity: " << values.GetCapacity() << std::endl;
 }
-
 
 template <typename Type>
 inline bool operator==(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {    
